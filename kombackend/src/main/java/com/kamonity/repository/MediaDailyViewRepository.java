@@ -1,0 +1,3 @@
+package com.kamonity.repository;
+import com.kamonity.model.MediaDailyView;import org.springframework.data.jpa.repository.JpaRepository;import org.springframework.data.jpa.repository.Modifying;import org.springframework.data.jpa.repository.Query;import org.springframework.data.repository.query.Param;import java.time.LocalDate;
+public interface MediaDailyViewRepository extends JpaRepository<MediaDailyView,Long>{@Modifying @Query(value="INSERT IGNORE INTO media_daily_views(media_asset_id,viewer_key,view_date,created_at) VALUES (:assetId,:viewer,:day,CURRENT_TIMESTAMP(6))",nativeQuery=true) int insertIfAbsent(@Param("assetId") Long id,@Param("viewer") String viewer,@Param("day") LocalDate day);}
