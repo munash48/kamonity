@@ -1,9 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Bell, CalendarDays, Compass, Crown, Home, Moon, Plus, Search, Sun, Users, Video } from 'lucide-react';
-import { communityApi, type DemoUser, type LeaderboardEntry, type NotificationItem, type PostComment, type UploadedMedia } from './api';
+import { Bell, CalendarDays, Compass, Crown, Home, Moon, Plus, Search, Sun, Users, Video, LogOut, User, Settings, HelpCircle, Edit } from 'lucide-react';
+import { communityApi, type LeaderboardEntry, type NotificationItem, type PostComment, type UploadedMedia } from './api';
 import { useCommunity, type Post } from './store';
 import { formatRelativeTime } from './time';
 import { PostComposer, PostComposerState } from './components/PostComposer';
+import { ProfileMenu } from './components/ProfileMenu';
+import { ProfilePage } from './components/ProfilePage';
+import { EditProfilePage } from './components/EditProfilePage';
+import { PreferencesPage } from './components/PreferencesPage';
+import { NotificationsPage } from './components/NotificationsPage';
+import { HelpPage } from './components/HelpPage';
 
 const tabs = ['Feed', 'Trending', 'Groups', 'Events', 'Videos', 'Advertisements'];
 const modules = ['Billionaires', 'Employment (ERM)', 'Spaces (Rent)', 'Sacco App', 'Investment', 'Education (School-EMIS)', 'Faith (FMIS)', 'Web-pages', 'Markets', 'Assets (Registry)', 'My Profile', 'Settings'];
@@ -51,8 +57,7 @@ function Reel({ media, reduced }: { media: UploadedMedia; reduced: boolean }) {
 }
 
 export default function App() {
-  const { dark, toggleTheme, activeTab, setTab, activeModule, setModule, posts, setPosts, setApiConnected } = useCommunity();
-  const [users, setUsers] = useState<DemoUser[]>([]);
+  const { dark, toggleTheme, activeTab, setTab, activeModule, setModule, posts, setPosts, setApiConnected, currentUser, setCurrentUser } = useCommunity();
   const [userId, setUserId] = useState(() => Number(localStorage.getItem('kommunity-demo-user-id') || 1));
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [reels, setReels] = useState<UploadedMedia[]>([]);
@@ -89,6 +94,8 @@ export default function App() {
   const [reportOpen, setReportOpen] = useState<Post | null>(null);
   const [reportReason, setReportReason] = useState('');
 
+  const [profilePage, setProfilePage] = useState<'profile' | 'edit' | 'preferences' | 'notifications' | 'help' | null>(null);
+
   const [query, setQuery] = useState('');
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches ||
@@ -108,14 +115,24 @@ export default function App() {
       .then(([p, u, l]) => {
         if (!alive) return;
         setPosts(p);
-        setUsers(u);
         setLeaders(l);
         setApiConnected(true);
         if (u.length && !u.some(x => x.id === userId)) setUserId(u[0].id);
+        // Set current user profile
+        const user = u.find(x => x.id === userId);
+        if (user) {
+          setCurrentUser({
+            id: user.id,
+            name: user.name,
+            email: `${user.name.toLowerCase().replace(/\s+/g, '.')}@kommunity.app`,
+            avatarUrl: null,
+            avatarColor: undefined,
+          });
+        }
       })
       .catch(() => setApiConnected(false));
     return () => { alive = false; };
-  }, [setPosts, setApiConnected]);
+  }, [setPosts, setApiConnected, userId, setCurrentUser]);
 
   useEffect(() => {
     if (activeTab === 'Videos') {
@@ -272,6 +289,15 @@ export default function App() {
 
   const reportPost = (p: Post) => openReport(p);
 
+  const logout = () => {
+    setCurrentUser(null);
+    setUserId(1);
+  };
+
+  const handleProfileMenuItem = (page: 'profile' | 'edit' | 'preferences' | 'notifications' | 'help') => {
+    setProfilePage(page);
+  };
+
   const filtered = useMemo(() => posts.filter(p =>
     `${p.name} ${p.body}`.toLowerCase().includes(query.toLowerCase())
   ), [posts, query]);
@@ -286,12 +312,6 @@ export default function App() {
         <label className="search-box">
           <Search size={16} />
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search KOMMUNITY" />
-        </label>
-        <label className="active-demo-user">
-          <span>DEMO USER · NOT SECURE AUTH</span>
-          <select value={userId} onChange={e => setUserId(+e.target.value)}>
-            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
         </label>
         <nav className="top-actions">
           <button className="icon-button" onClick={() => setTab('Feed')} aria-label="Home">
@@ -329,6 +349,19 @@ export default function App() {
           <button className="icon-button" onClick={toggleTheme}>
             {dark ? <Sun /> : <Moon />}
           </button>
+          <ProfileMenu
+            user={currentUser}
+            onLogout={logout}
+            items={[
+              { label: 'View profile', icon: <User size={16} />, onClick: () => handleProfileMenuItem('profile') },
+              { label: 'Edit profile', icon: <Edit size={16} />, onClick: () => handleProfileMenuItem('edit') },
+              { label: 'Preferences', icon: <Settings size={16} />, onClick: () => handleProfileMenuItem('preferences') },
+              { label: 'Notifications', icon: <Bell size={16} />, onClick: () => handleProfileMenuItem('notifications') },
+              { label: 'Help & support', icon: <HelpCircle size={16} />, onClick: () => handleProfileMenuItem('help') },
+              { divider: true },
+              { label: 'Log out', icon: <LogOut size={16} />, onClick: logout, destructive: true },
+            ]}
+          />
         </nav>
       </header>
 
@@ -512,6 +545,48 @@ export default function App() {
               <button type="submit" className="primary-button">Submit Report</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {profilePage === 'profile' && currentUser && (
+        <Modal title="Profile" close={() => setProfilePage(null)}>
+          <ProfilePage user={{
+            name: currentUser.name,
+            email: currentUser.email,
+            avatarUrl: currentUser.avatarUrl || undefined,
+            avatarColor: currentUser.avatarColor,
+            role: 'Community Member',
+            joinedAt: '2024',
+          }} />
+        </Modal>
+      )}
+
+      {profilePage === 'edit' && currentUser && (
+        <Modal title="Edit Profile" close={() => setProfilePage(null)}>
+          <EditProfilePage user={{
+            name: currentUser.name,
+            email: currentUser.email,
+            avatarUrl: currentUser.avatarUrl || undefined,
+            avatarColor: currentUser.avatarColor,
+          }} onClose={() => setProfilePage(null)} />
+        </Modal>
+      )}
+
+      {profilePage === 'preferences' && currentUser && (
+        <Modal title="Preferences" close={() => setProfilePage(null)}>
+          <PreferencesPage onClose={() => setProfilePage(null)} />
+        </Modal>
+      )}
+
+      {profilePage === 'notifications' && (
+        <Modal title="Notifications" close={() => setProfilePage(null)}>
+          <NotificationsPage onClose={() => setProfilePage(null)} />
+        </Modal>
+      )}
+
+      {profilePage === 'help' && (
+        <Modal title="Help & Support" close={() => setProfilePage(null)}>
+          <HelpPage onClose={() => setProfilePage(null)} />
         </Modal>
       )}
     </div>

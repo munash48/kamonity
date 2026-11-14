@@ -1,5 +1,13 @@
 import { create } from 'zustand';
 
+export type UserProfile = {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+  avatarColor?: string;
+};
+
 export type Post = {
   id: number;
   name: string;
@@ -25,6 +33,7 @@ type CommunityState = {
   composer: string;
   posts: Post[];
   apiConnected: boolean;
+  currentUser: UserProfile | null;
   setPosts: (posts: Post[]) => void;
   setApiConnected: (connected: boolean) => void;
   toggleTheme: () => void;
@@ -32,6 +41,7 @@ type CommunityState = {
   setModule: (module: string) => void;
   setChatOpen: (open: boolean) => void;
   setComposer: (text: string) => void;
+  setCurrentUser: (user: UserProfile | null) => void;
   addPost: () => void;
   vote: (id: number) => void;
   share: (id: number) => void;
@@ -82,6 +92,7 @@ export const useCommunity = create<CommunityState>((set, get) => ({
   composer: '',
   posts: initialPosts,
   apiConnected: false,
+  currentUser: null,
   setPosts: (posts) => set({ posts }),
   setApiConnected: (apiConnected) => set({ apiConnected }),
   toggleTheme: () =>
@@ -96,6 +107,7 @@ export const useCommunity = create<CommunityState>((set, get) => ({
   setModule: (activeModule) => set({ activeModule }),
   setChatOpen: (chatOpen) => set({ chatOpen }),
   setComposer: (composer) => set({ composer }),
+  setCurrentUser: (currentUser) => set({ currentUser }),
   addPost: () => {
     const text = get().composer.trim();
     if (!text) return;
