@@ -19,12 +19,13 @@ type ApiPost = {
   votes: number;
   comments: number;
   shares: number;
+  reportCount?: number;
   createdAt: string;
   media?: UploadedMedia | null;
 };
 
 function mapPost(post: ApiPost): Post {
-  return { id: post.id, name: post.author?.name ?? post.authorName, role: 'Community member', time: formatRelativeTime(post.createdAt), body: post.content, tags: post.content.match(/#[\w]+/g) ?? [], votes: post.votes, comments: post.comments, shares: post.shares, voted: false, avatar: post.authorName.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase(), tone: 'lavender', media: post.media ?? null };
+  return { id: post.id, name: post.author?.name ?? post.authorName, role: 'Community member', time: formatRelativeTime(post.createdAt), body: post.content, tags: post.content.match(/#[\w]+/g) ?? [], votes: post.votes, comments: post.comments, shares: post.shares, reportCount: post.reportCount ?? 0, voted: false, avatar: post.authorName.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase(), tone: 'lavender', media: post.media ?? null };
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
