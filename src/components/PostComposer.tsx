@@ -283,14 +283,30 @@ export function PostComposer({ state, setState, busy, onSubmit }: PostComposerPr
             </button>
           </div>
           {state.file && (
-            <div className="file-preview">
-              <div className="file-info">
-                <X size={16} className="file-icon" />
-                <span className="file-name">{state.file.name}</span>
-                <span className="file-size">{fileSizeDisplay}</span>
+            <div className="media-preview">
+              <div className="media-thumbnail">
+                {state.file.type.startsWith('video/') ? (
+                  <div className="video-thumbnail">
+                    <Video size={32} />
+                    <span className="video-duration">{state.file.name}</span>
+                  </div>
+                ) : (
+                  <img
+                    src={URL.createObjectURL(state.file)}
+                    alt={state.file.name}
+                    className="image-thumbnail"
+                    onLoad={(e) => {
+                      URL.revokeObjectURL((e.target as HTMLImageElement).src);
+                    }}
+                  />
+                )}
               </div>
-              <button type="button" className="file-remove" onClick={removeFile}>
-                <X size={14} />
+              <div className="media-info">
+                <div className="media-name">{state.file.name}</div>
+                <div className="media-size">{fileSizeDisplay}</div>
+              </div>
+              <button type="button" className="media-remove" onClick={removeFile}>
+                <X size={16} />
               </button>
             </div>
           )}
