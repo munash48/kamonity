@@ -446,7 +446,7 @@ const filtered = useMemo(() => posts.filter(p =>
                     <header className="post-header">
                       <Face name={p.name} />
                       <div className="post-author">
-                        <b>{p.name}</b>
+                        <b>{p.name}</b>{' '}
                         <small>{p.time}</small>
                       </div>
                     </header>
