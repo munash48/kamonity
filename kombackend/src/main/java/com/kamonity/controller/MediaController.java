@@ -60,13 +60,11 @@ public class MediaController {
         }
 
         String mime = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
-        long maxSize = photo ? 10L * 1024 * 1024 : 100L * 1024 * 1024;
+        long maxSizeBytes = photo ? 10L * 1024 * 1024 : 100L * 1024 * 1024;
 
-        if (photo && file.getSize() > maxSize) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Photos must be at most 10 MB");
-        }
-        if (reel && file.getSize() > maxSize) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reels must be at most 100 MB");
+        if (file.getSize() > maxSizeBytes) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    photo ? "Photos must be at most 10 MB" : "Reels must be at most 100 MB");
         }
 
         if (photo) {
@@ -88,13 +86,19 @@ public class MediaController {
 
         try {
             byte[] bytes = file.getBytes();
-            Files.createDirectories(Path.of(storage));
+            Path storagePath = Path.of(storage).toAbsolutePath().normalize();
+            Files.createDirectories(storagePath);
 
             String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-            String extension = mime.equals("video/quicktime") ? ".mov" : mime.equals("video/webm") ? ".webm" : photo ? ".img" : ".mp4";
+            String extension = "";
+            if (mime.equals("video/quicktime")) extension = ".mov";
+            else if (mime.equals("video/webm")) extension = ".webm";
+            else if (photo) extension = ".img";
+            else extension = ".mp4";
+
             String sourceKey = hash + "-source" + extension;
 
-            Path source = Path.of(storage).resolve(sourceKey);
+            Path source = storagePath.resolve(sourceKey);
             Files.write(source, bytes, StandardOpenOption.CREATE_NEW);
 
             String originalFilename = file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
