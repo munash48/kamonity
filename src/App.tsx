@@ -460,15 +460,28 @@ export default function App() {
       {details && (
         <Modal title={`${details.name}'s post`} close={() => setDetails(null)}>
           <p>{details.body}</p>
-          <p>{details.votes} votes · {details.comments} comments</p>
+          <div className="modal-post-stats">
+            <span>{details.votes} votes</span>
+            <span>{details.comments} comments</span>
+            <span>{details.shares} shares</span>
+            <span>{details.reportCount || 0} reports</span>
+          </div>
           {comments.map(c => (
             <p key={c.id}>
               <b>{c.authorName}</b>: {c.content} · {formatRelativeTime(c.createdAt)}
             </p>
           ))}
           <form className="modal-comment-form" onSubmit={commentPost}>
-            <input value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Write a comment" />
-            <button className="primary-button">Comment</button>
+            <div className="modal-comment-input-group">
+              <input
+                type="text"
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                placeholder="Write a comment"
+                maxLength={2000}
+              />
+              <button type="submit" className="primary-button">Comment</button>
+            </div>
           </form>
         </Modal>
       )}
