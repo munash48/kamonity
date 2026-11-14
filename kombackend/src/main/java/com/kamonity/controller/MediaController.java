@@ -136,11 +136,12 @@ public class MediaController {
         g.drawImage(input, 0, 0, w, h, Color.WHITE, null);
         g.dispose();
 
-        String key = asset.getId() + "-" + asset.getStorageKey().substring(0, Math.min(24, asset.getStorageKey().length())) + ".jpg";
-        ImageIO.write(output, "jpg", Path.of(storage).resolve(key).toFile());
+        Path storagePath = Path.of(storage).toAbsolutePath().normalize();
+        String outputKey = asset.getId() + "-" + asset.getStorageKey().substring(0, Math.min(24, asset.getStorageKey().length())) + ".jpg";
+        ImageIO.write(output, "jpg", storagePath.resolve(outputKey).toFile());
         Files.deleteIfExists(source);
 
-        asset.complete(key, null, w, h, null);
+        asset.complete(outputKey, null, w, h, null);
         media.save(asset);
     }
 
@@ -176,7 +177,8 @@ public class MediaController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        Path path = Path.of(storage).resolve(key).normalize();
+        Path storagePath = Path.of(storage).toAbsolutePath().normalize();
+        Path path = storagePath.resolve(key).normalize();
         if (!Files.exists(path)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
