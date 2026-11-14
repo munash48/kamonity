@@ -298,7 +298,23 @@ export default function App() {
     setProfilePage(page);
   };
 
-  const filtered = useMemo(() => posts.filter(p =>
+  function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => (
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={i} className="search-highlight">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      ))}
+    </>
+  );
+}
+
+const filtered = useMemo(() => posts.filter(p =>
     `${p.name} ${p.body}`.toLowerCase().includes(query.toLowerCase())
   ), [posts, query]);
 
@@ -410,15 +426,19 @@ export default function App() {
             </section>
           ) : (
             <>
-              <PostComposer
-                state={composerState}
-                setState={setComposerState}
-                busy={busy}
-                onSubmit={publish}
-                userId={userId}
-                media={media}
-              />
-              {error && <p role="alert">{error}</p>}
+              {!query && (
+                <>
+                  <PostComposer
+                    state={composerState}
+                    setState={setComposerState}
+                    busy={busy}
+                    onSubmit={publish}
+                    userId={userId}
+                    media={media}
+                  />
+                  {error && <p role="alert">{error}</p>}
+                </>
+              )}
 
               <div className="posts-list">
                 {filtered.map(p => (
@@ -432,7 +452,11 @@ export default function App() {
                     </header>
 
                     <button className="post-body post-body-open" onClick={() => void openDetails(p)}>
-                      {p.body} · Details
+                      {query ? (
+                        <HighlightedText text={p.body} query={query} />
+                      ) : (
+                        <> {p.body} · Details </>
+                      )}
                     </button>
 
                     {p.media && (
