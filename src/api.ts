@@ -42,25 +42,63 @@ export const communityApi = {
   async getPosts(): Promise<Post[]> { return (await request<ApiPost[]>('/posts')).map(mapPost); },
   getUsers(): Promise<DemoUser[]> { return request<DemoUser[]>('/users'); },
   getUserVotes(userId: number): Promise<number[]> { return request<number[]>(`/users/${userId}/votes`); },
-  async createPost(content: string, authorId: number, mediaAssetId?: number): Promise<Post> { return mapPost(await request<ApiPost>('/posts', { method: 'POST', body: JSON.stringify({ authorId, content, mediaAssetId }) })); },
+  async createPost(content: string, authorId: number, mediaAssetId?: number): Promise<Post> {
+    return mapPost(await request<ApiPost>('/posts', { method: 'POST', body: JSON.stringify({ authorId, content, mediaAssetId }) }));
+  },
   async vote(id: number, userId: number): Promise<Post> { return mapPost(await request<ApiPost>(`/posts/${id}/vote`, { method: 'POST', body: JSON.stringify({ userId }) })); },
   getComments(postId: number): Promise<PostComment[]> { return request<PostComment[]>(`/posts/${postId}/comments`); },
-  createComment(postId: number, userId: number, content: string): Promise<PostComment> { return request<PostComment>(`/posts/${postId}/comments`, { method: 'POST', body: JSON.stringify({ userId, content }) }); },
-  sendInvitation(inviterUserId: number, contact: { email?: string; phone?: string }): Promise<InvitationResponse> { return request<InvitationResponse>('/invitations/send', { method: 'POST', body: JSON.stringify({ inviterUserId, ...contact }) }); },
-  async sharePost(postId: number, userId: number): Promise<void> { await request(`/posts/${postId}/share`, { method: 'POST', body: JSON.stringify({ userId }) }); },
-  reportPost(postId:number,userId:number,reasonCode:string,details=''):Promise<PostReportResponse>{return request<PostReportResponse>(`/posts/${postId}/report`,{method:'POST',body:JSON.stringify({userId,reasonCode,details})});},
+  createComment(postId: number, userId: number, content: string): Promise<PostComment> {
+    return request<PostComment>(`/posts/${postId}/comments`, { method: 'POST', body: JSON.stringify({ userId, content }) });
+  },
+  sendInvitation(inviterUserId: number, contact: { email?: string; phone?: string }): Promise<InvitationResponse> {
+    return request<InvitationResponse>('/invitations/send', { method: 'POST', body: JSON.stringify({ inviterUserId, ...contact }) });
+  },
+  async sharePost(postId: number, userId: number): Promise<void> {
+    await request(`/posts/${postId}/share`, { method: 'POST', body: JSON.stringify({ userId }) });
+  },
+  reportPost(postId: number, userId: number, reasonCode: string, details = ''): Promise<PostReportResponse> {
+    return request<PostReportResponse>(`/posts/${postId}/report`, { method: 'POST', body: JSON.stringify({ userId, reasonCode, details }) });
+  },
 
   getNotifications(userId: number): Promise<NotificationBatch> { return request<NotificationBatch>(`/users/${userId}/notifications`); },
-  markNotificationsViewed(userId: number, ids: number[]): Promise<NotificationBatch> { return request<NotificationBatch>(`/users/${userId}/notifications/mark-viewed`, { method: 'POST', body: JSON.stringify({ ids }) }); },
-  async uploadMedia(userId:number,kind:'photo'|'reel',file:File,trimStartSeconds=0,trimEndSeconds?:number):Promise<UploadedMedia>{
-    const form=new FormData();form.append('file',file);
-    const query=new URLSearchParams({userId:String(userId),kind,trimStartSeconds:String(trimStartSeconds)});
-    if(trimEndSeconds!==undefined)query.set('trimEndSeconds',String(trimEndSeconds));
-    const response=await fetch(`/api/v1/media/upload?${query}`,{method:'POST',body:form});
-    if(!response.ok){let message=`Upload failed (${response.status})`;try{const body=await response.json();if(body.message)message=body.message;}catch{/* ignore */}throw new Error(message);}
+  markNotificationsViewed(userId: number, ids: number[]): Promise<NotificationBatch> {
+    return request<NotificationBatch>(`/users/${userId}/notifications/mark-viewed`, { method: 'POST', body: JSON.stringify({ ids }) });
+  },
+  async uploadMedia(userId: number, kind: 'photo' | 'reel', file: File, trimStartSeconds = 0, trimEndSeconds?: number): Promise<UploadedMedia> {
+    const form = new FormData();
+    form.append('file', file);
+    const query = new URLSearchParams({ userId: String(userId), kind, trimStartSeconds: String(trimStartSeconds) });
+    if (trimEndSeconds !== undefined) query.set('trimEndSeconds', String(trimEndSeconds));
+    const response = await fetch(`/api/v1/media/upload?${query}`, { method: 'POST', body: form });
+    if (!response.ok) {
+      let message = `Upload failed (${response.status})`;
+      try { const body = await response.json(); if (body.message) message = body.message; } catch { /* ignore */ }
+      throw new Error(message);
+    }
     return response.json() as Promise<UploadedMedia>;
   },
-  getMediaFeed():Promise<UploadedMedia[]>{return request<UploadedMedia[]>('/media/feed');},
-  recordMediaView(mediaId:number,sessionKey:string):Promise<{accepted:boolean}>{return request(`/media/${mediaId}/view`,{method:'POST',headers:{'X-Viewer-Session':sessionKey}});},
+  getMediaFeed(): Promise<UploadedMedia[]> { return request<UploadedMedia[]>('/media/feed'); },
+  recordMediaView(mediaId: number, sessionKey: string): Promise<{ accepted: boolean }> {
+    return request(`/media/${mediaId}/view`, { method: 'POST', headers: { 'X-Viewer-Session': sessionKey } });
+  },
   getLeaderboard(): Promise<LeaderboardEntry[]> { return request<LeaderboardEntry[]>('/leaderboard'); },
+
+  async fetchLinkPreview(url: string): Promise<{ title: string; description: string; image: string } | null> {
+    try {
+      const response = await fetch('/api/v1/link-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return {
+        title: data.title || '',
+        description: data.description || '',
+        image: data.image || '',
+      };
+    } catch {
+      return null;
+    }
+  },
 };

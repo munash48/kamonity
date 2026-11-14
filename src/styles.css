@@ -41,3 +41,24 @@ textarea{width:90%;max-width:100%}
 .post-modal>form{padding:6px 20px 18px;display:flex;flex-direction:column;gap:10px}
 .post-modal>form textarea{margin:0}
 .post-modal>form .modal-actions{margin:4px 0 0}
+
+/* Post Composer Component Styles */
+.composer-tool-button{width:28px;height:28px;border-radius:50%;background:var(--paper);border:1px solid #e9e9ef;display:grid;place-items:center;color:#626472;cursor:pointer;transition:background .15s,border-color .15s,color .15s}.composer-tool-button:hover{border-color:#d9b5c6;color:var(--accent)}.composer-tool-button.active{background:var(--accent-soft);border-color:#c9b0d0;color:var(--accent)}.composer-tool-button svg{width:16px;height:16px}
+
+.composer-input-group{display:flex;gap:6px;align-items:center;margin-top:6px}.composer-input-group input{flex:1;border:1px solid var(--line);border-radius:16px;background:var(--canvas);color:var(--ink);padding:8px 12px;font-size:10px;outline:none;transition:border-color .15s,background-color .15s}.composer-input-group input:focus{border-color:#d5a6bc;background:var(--paper)}.composer-input-group input::placeholder{color:#9295a1}.url-clear{width:20px;height:20px;border-radius:50%;background:var(--canvas);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer;opacity:0;transition:opacity .15s}.composer-input-group input:focus ~ .url-clear,.composer-input-group input:not(:placeholder-shown) ~ .url-clear{opacity:1}.composer-input-group input:hover ~ .url-clear{opacity:1}
+
+.composer-count{width:60px;text-align:right;font-size:9px;color:#9a9ca5}
+.composer-count.warning{color:#dc4964}
+
+.link-preview{display:flex;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0 0;position:relative}.link-preview-image{width:48px;height:48px;border-radius:8px;object-fit:cover}.link-preview-content{flex:1;min-width:0}.link-preview-content h4{margin:0 0 2px;font-size:11px;font-weight:650;color:var(--ink)}.link-preview-content p{margin:0;font-size:9px;color:var(--muted);line-height:1.3}.link-preview-remove{width:20px;height:20px;border-radius:50%;background:var(--canvas);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer;opacity:0;transition:opacity .15s}.link-preview:hover .link-preview-remove{opacity:1}
+
+.video-preview{display:flex;gap:10px;align-items:center;background:var(--accent-soft);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0 0;color:var(--accent)}.video-preview-icon{width:40px;height:40px;border-radius:8px;background:var(--accent);display:grid;place-items:center}.video-preview-content{flex:1;min-width:0}.video-preview-content strong{font-size:11px;font-weight:650}.video-preview-content p{margin:0;font-size:9px;color:var(--muted);line-height:1.3}
+
+.drop-zone{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;transition:border-color .15s,background-color .15s}.drop-zone.drag-over{border-color:var(--accent);background:#fff0f7}.drop-zone-content{display:flex;flex-direction:column;align-items:center;gap:8px}.drop-zone-content svg{width:24px;height:24px;color:var(--muted)}.drop-zone-content span{font-size:10px;color:var(--muted)}.drop-zone-content small{font-size:8px;color:#9aa0a6}.browse-button{margin-top:4px;padding:8px 16px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:9px;font-weight:650;color:#626472}.browse-button:hover{border-color:var(--accent);color:var(--accent)}
+
+.file-preview{display:flex;gap:8px;align-items:center;background:var(--canvas);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}.file-icon{color:var(--accent)}.file-name{font-size:9px;color:var(--ink);font-weight:650}.file-size{font-size:8px;color:var(--muted)}.file-remove{width:20px;height:20px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer}.file-remove:hover{background:var(--accent);color:white}
+
+@media(max-width:720px){
+  .composer-card{padding:12px;margin-bottom:10px}.composer-top{gap:8px}
+  .composer-input-group input{padding:8px 10px;font-size:9px}.browser-button{padding:6px 12px}
+}
